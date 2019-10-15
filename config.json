@@ -1,0 +1,6 @@
+{
+   "moodle_url" : "https://moodle.temp.tld",
+   "moodle_token" : "-------------------------",
+   "course_whitelist" : ["Course1", "Course2"],
+   "base_path" : "/home/name/moodle/"
+}
