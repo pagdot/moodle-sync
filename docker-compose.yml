@@ -1,0 +1,17 @@
+---
+version: "2"
+services:
+  moodle_sync:
+    image: pagdot/moodle_sync
+    container_name: moodle_sync
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Vienna
+      - MOODLE_URL=https://moodle.univercity.edu
+      - MOODLE_TOKEN=<token>
+      - MOODLE_WHITELIST=Course1,Course2,Course3,Course4
+      - SYNC_INTERVAL=300
+    volumes:
+      - ./data:/data
+    restart: unless-stopped

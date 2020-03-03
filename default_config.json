@@ -1,0 +1,12 @@
+{
+   "moodle_url": "https://moodle.univercity.edu",
+   "moodle_token": "<token>",
+   "whitelist": [
+      "Course1",
+      "Course2",
+      "Course3",
+      "Course4"
+   ],
+   "path": "/data",
+   "interval": 300
+}
