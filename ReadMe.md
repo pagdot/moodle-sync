@@ -30,10 +30,10 @@ Syncs files from moodle courses to your harddisk
 3. Set follwing paramters in the file `config.json`
    - `moodle_url` to the base url of the Moodle-server
    - `moodle_token` to your previously generated access-token
-   - `course_whitelist` to your whitelisted courses.
+   - `whitelist` to your whitelisted courses.
      A course is whitelisted if the string of one entry of the whitelist
      is contained in the course name.
-   - `base_path` to the base path to store the downloaded files
+   - `path` to the path to store the downloaded files
 
 ## Run Script
 
