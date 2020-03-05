@@ -12,7 +12,7 @@ function request(url) {
    return new Promise((resolve, reject) => {
       // select http or https module, depending on reqested url
       const lib = url.startsWith('https') ? require('https') : require('http');
-      const request = lib.get(url, (response) => {
+      const request = lib.get(url, response => {
          // handle http errors
          if (response.statusCode < 200 || response.statusCode > 299) {
             reject(new Error('Failed to load page, status code: ' + response.statusCode));
@@ -20,12 +20,12 @@ function request(url) {
          // temporary data holder
          const body = [];
          // on every content chunk, push it to the data array
-         response.on('data', (chunk) => body.push(chunk));
+         response.on('data', chunk => body.push(chunk));
          // we are done, resolve promise with those joined chunks
-         response.on('end', () => resolve(Buffer.concat(body)));
+         response.on('end', resolve(Buffer.concat(body)));
       });
       // handle connection errors of the request
-      request.on('error', (err) => reject(err))
+      request.on('error', err => reject(err))
    })
 }
 
@@ -41,7 +41,7 @@ function run(config) {
                   console.log("Downloading updated file " + path)
                   return request(dl.url).then(data => fs.writeFile(path, data))
                }
-            }, (err) => {
+            }, err => {
                if (err.code === "ENOENT") {
                   return fs.mkdir(folder, { recursive: true })
                      .then(console.log("Downloading new file " + path))
@@ -49,14 +49,14 @@ function run(config) {
                }
             });
          }));
-      }).then(() => console.log("Finished!"));
+      }).then(console.log("Finished!"));
 }
 
 console.log("Config: " + JSON.stringify(config));
 console.log("Starting initial run...");
 run(config);
 
-setInterval((config) => {
+setInterval(config => {
    console.log("Starting update...");
    run(config);
 }, config.interval * 1000, config);

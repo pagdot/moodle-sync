@@ -30,7 +30,7 @@ function reduce(arr) {
 //   url:         url to moodle installation
 //   token:       moodle api token
 //   whitelist:   string array of fragments of course-shortnames
-//return: array of fileurls (see "extractFileUrls" for more info
+//return: array of fileurls (see "extractFileUrls" for more info)
 function getFiles(url, token, whitelist) {
    let courseFileUrls = getUid(url, token)
       .then(uid => getCourses(url, token, uid))
