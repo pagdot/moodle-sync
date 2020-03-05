@@ -34,8 +34,8 @@ function run(config) {
       .then(urls => {
          //console.log(urls);
          return Promise.all(urls.map(dl => {
-            let folder = (config.path + "/" + dl.course + "/" + dl.module);
-            let path = folder + "/" + dl.fileName;
+            let folder = (config.path + "/" + dl.course + "/" + dl.module).replace(/[:"]/, "_");
+            let path = folder + "/" + dl.fileName.replace(/[:"]/, "_");
             return fs.stat(path).then(stats => {
                if (stats.mtime < dl.time) {
                   console.log("Downloading updated file " + path)
