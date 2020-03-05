@@ -1,5 +1,6 @@
 const fs = require('fs').promises;
 const moodle = require('./moodle.js');
+const request = require('request');
 
 function requiereEnv(name) {
    if (!process.env[name]) {
@@ -24,26 +25,17 @@ const config = {
 }
 
 // wrap a request in an promise
-function request(url) {
+function requestPromise(url) {
    // return new pending promise
    return new Promise((resolve, reject) => {
-      // select http or https module, depending on reqested url
-      const lib = url.startsWith('https') ? require('https') : require('http');
-      const request = lib.get(url, response => {
-         // handle http errors
-         if (response.statusCode < 200 || response.statusCode > 299) {
-            reject(new Error('request: Failed to load page, status code: ' + response.statusCode));
+      request(url, (error, response, body) => {
+         if (error) reject('requestPromise: ' + error + (body ? ': ' + JSON.stringify(body) : ''));
+         if (response.statusCode != 200) {
+            reject('requestPromise: Invalid status code <' + response.statusCode + '>' + JSON.stringify(body));
          }
-         // temporary data holder
-         const body = [];
-         // on every content chunk, push it to the data array
-         response.on('data', chunk => body.push(chunk));
-         // we are done, resolve promise with those joined chunks
-         response.on('end', resolve(Buffer.concat(body)));
+         resolve(body);
       });
-      // handle connection errors of the request
-      request.on('error', err => reject('request: ' + err))
-   })
+   });
 }
 
 function sendNotifications(cfg, title, message) {
@@ -52,7 +44,6 @@ function sendNotifications(cfg, title, message) {
          reject('sendNotifications: Invalid configuration')
       });
    }
-   const request = require('request');
 
    let options = {
       method: "POST",
@@ -84,22 +75,26 @@ function run(config) {
          return Promise.all(urls.map(dl => {
             let folder = (config.path + "/" + dl.course + "/" + dl.module);
             let path = folder + "/" + dl.fileName;
-            return fs.stat(path).then(stats => {
-               if (stats.mtime < dl.time) {
-                  console.log("Downloading updated file " + path)
-                  return sendNotifications(config.gotify, 'Updating file in ' + dl.course, 'Updating file "' + dl.fileName + '" in module "' + dl.module + '"')
-                     .catch(error => console.log('[ERROR] ' + error))
-                     .then(request(dl.url).then(data => fs.writeFile(path, data)))
-               }
-            }, err => {
-               if (err.code === "ENOENT") {
-                  return fs.mkdir(folder, { recursive: true })
-                     .then(console.log("Downloading new file " + path))
-                     .then(sendNotifications(config.gotify, 'New file in ' + dl.course, 'New file "' + dl.fileName + '" in module "' + dl.module + '"'))
-                     .catch(error => console.log('[ERROR] ' + error))
-                     .then(request(dl.url).then(data => fs.writeFile(path, data)));
-               }
-            });
+            return fs.stat(path)
+               .then(
+                  stats => {
+                     if (stats.mtime < dl.time) {
+                        console.log("Downloading updated file " + path)
+                        return sendNotifications(config.gotify, 'Updating file in ' + dl.course, 'Updating file "' + dl.fileName + '" in module "' + dl.module + '"')
+                           .catch(error => console.log('[ERROR] ' + error))
+                           .then(requestPromise(dl.url)
+                           .then(data => fs.writeFile(path, data)))
+                     }
+                  }, err => {
+                     if (err.code === "ENOENT") {
+                        return fs.mkdir(folder, { recursive: true })
+                           .then(console.log("Downloading new file " + path))
+                           .then(sendNotifications(config.gotify, 'New file in ' + dl.course, 'New file "' + dl.fileName + '" in module "' + dl.module + '"'))
+                           .catch(error => console.log('[ERROR] ' + error))
+                           .then(requestPromise(dl.url)
+                           .then(data => fs.writeFile(path, data)));
+                     }
+               });
          }));
       }).then(console.log("Finished!"));
 }
