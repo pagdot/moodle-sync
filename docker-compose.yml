@@ -12,6 +12,8 @@ services:
       - MOODLE_TOKEN=<token>
       - MOODLE_WHITELIST=Course1,Course2,Course3,Course4
       - SYNC_INTERVAL=300
+      - GOTIFY_URL=https://gotify.server.com
+      - GOTIFY_TOKEN=<token>
     volumes:
       - ./data:/data
     restart: unless-stopped
