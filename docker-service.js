@@ -25,10 +25,10 @@ const config = {
 }
 
 // wrap a request in an promise
-function requestPromise(url) {
+function requestPromise(param) {
    // return new pending promise
    return new Promise((resolve, reject) => {
-      request(url, (error, response, body) => {
+      request(param, (error, response, body) => {
          if (error) reject('requestPromise: ' + error + (body ? ': ' + JSON.stringify(body) : ''));
          if (response.statusCode != 200) {
             reject('requestPromise: Invalid status code <' + response.statusCode + '>' + JSON.stringify(body));
@@ -82,7 +82,7 @@ function run(config) {
                         console.log("Downloading updated file " + path)
                         return sendNotifications(config.gotify, 'Updating file in ' + dl.course, 'Updating file "' + dl.fileName + '" in module "' + dl.module + '"')
                            .catch(error => console.log('[ERROR] ' + error))
-                           .then(requestPromise(dl.url)
+                           .then(requestPromise({ url: dl.url, encoding: null })
                            .then(data => fs.writeFile(path, data)))
                      }
                   }, err => {
@@ -91,7 +91,7 @@ function run(config) {
                            .then(console.log("Downloading new file " + path))
                            .then(sendNotifications(config.gotify, 'New file in ' + dl.course, 'New file "' + dl.fileName + '" in module "' + dl.module + '"'))
                            .catch(error => console.log('[ERROR] ' + error))
-                           .then(requestPromise(dl.url)
+                           .then(requestPromise({ url: dl.url, encoding: null })
                            .then(data => fs.writeFile(path, data)));
                      }
                });
