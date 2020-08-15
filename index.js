@@ -30,7 +30,7 @@ moodle.getFiles(config.moodle_url, config.moodle_token, config.whitelist)
    .then(urls => {
       //console.log(urls);
       return Promise.all(urls.map(dl => {
-         let folder = (config.path + "/" + dl.course + "/" + dl.module).replace(/[:"]/, "_");
+         let folder = (config.path + "/" + dl.course + "/" + dl.module).replace(/[<>:"\\\?\*\^]/, "_");
          let path = folder + "/" + dl.fileName.replace(/[:"]/, "_");
          return fs.stat(path).then(stats => {
                if (stats.mtime < dl.time) {
